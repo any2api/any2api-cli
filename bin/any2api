@@ -1,0 +1,232 @@
+#!/usr/bin/env node
+'use strict';
+
+var app = require('commander');
+var npm = require('npm');
+var fs = require('fs-extra');
+var path = require('path');
+var url = require('url');
+var async = require('async');
+var _ = require('lodash');
+_.str = require('underscore.string');
+
+var util = require('any2api-util');
+var reg = require('any2api-reg');
+
+var specFile = 'apispec.json';
+var defaultOutput = '.';
+var scannerPrefix = 'any2api-scanner-';
+
+
+
+app.version(require('../package.json').version)
+  .option('-o, --output <dir>', 'set output directory (default: \'.\')', defaultOutput)
+  .option('-S, --scanner <name>', 'select scanner to analyze executable')
+  .option('-r, --retrieve <name>', 'select retrieve protocol to download files (default: \'http\')')
+  .option('-s, --subdir <dir>', 'set subdir (rel. to output) of executable ' +
+            '(default: \'executable\')', 'executable')
+  .option('-c, --copy-executable', 'copy executable to output directory (disabled by default)')
+  .option('-G, --generator <name>', 'select generator to create API implementation')
+  .option('-p, --prepare-executable', 'prepare executable at buildtime (disabled by default)')
+  .option('-i, --interface <name>', 'select type of interface (default: \'rest\')', 'rest')
+  .option('-t, --impl-type <name>', 'select type of API implementation (default: \'node\')', 'node');
+
+app.command('scan <executable>')
+  .description('scan given executable (dir, file, or URL) and create API spec')
+  .action(function(exec) {
+    var output = path.resolve(app.output);
+
+    var scanners = reg.Scanners();
+
+    //TODO: maybe move some of the logic from here to any2api-reg/Scanners
+    if (app.scanner && !scanners.existsSync(app.scanner)) {
+      app.scanner = scannerPrefix + app.scanner;
+
+      if (!scanners.existsSync(app.scanner)) {
+        throw new Error('scanner ' + app.scanner + ' missing');
+      }
+    }
+
+    var execPath = output;
+
+    if (app.subdir) execPath = path.join(output, app.subdir);
+
+    fs.mkdirsSync(path.join(execPath, '..'));
+
+    var specPath = path.join(output, specFile);
+
+    var scan = function() {
+      console.log('Scanning executable:', execPath);
+
+      var basename = path.basename(exec, path.extname(exec));
+
+      if (app.scanner) {
+        scanners.get(app.scanner, function(err, Scanner) {
+          if (err) throw err;
+
+          Scanner().scan(execPath, writeSpec);
+        });
+      } else {
+        scanners.scan(execPath, writeSpec);
+      }
+    }
+
+    var writeSpec = function(err, apiSpec) {
+      console.log('Executable scanned.');
+
+      if (err) throw err;
+      else if (_.isEmpty(apiSpec)) throw new Error('api spec is empty');
+
+      console.log('Writing API spec:', specPath);
+
+      apiSpec.executable_path = path.relative(output, execPath);
+      if (_.str.startsWith(apiSpec.executable_path, '..')) apiSpec.executable_path = execPath;
+      else if (_.isEmpty(apiSpec.executable_path)) apiSpec.executable_path = '.';
+
+      fs.writeFileSync(specPath, JSON.stringify(apiSpec, null, 2));
+
+      console.log('API spec written.');
+    }
+
+    var storeExecCallback = function(err) {
+      if (err) throw err;
+
+      console.log('Executable stored:', execPath);
+
+      scan();
+    };
+
+    if (!app.retriever &&
+        (_.str.startsWith(exec, 'http://') || _.str.startsWith(exec, 'https://'))) {
+      app.retriever = 'http';
+    } else if (!app.retriever && _.str.startsWith(exec, 'lp:')) {
+      app.retriever = 'bzr';
+    }
+
+    if (app.retriever) {
+      console.log('Retrieving executable:', exec);
+
+      var execUrl = exec;
+      exec = _.last(url.parse(execUrl).pathname.replace(/\/$/, '').split('/'));
+
+      if (app.retriever === 'http' || app.retriever === 'https') {
+        util.download({ url: execUrl, dir: execPath }, storeExecCallback);
+      } else if (app.retriever === 'git') {
+        util.checkoutGit({ url: execUrl, dir: execPath }, storeExecCallback);
+      } else if (app.retriever === 'bzr' || app.retriever === 'bazaar') {
+        util.checkoutBzr({ url: execUrl, dir: execPath }, storeExecCallback);
+      } else {
+        throw new Error('retriever ' + app.retriever + ' missing');
+      }
+    } else if (!fs.existsSync(exec)) {
+      throw new Error('executable ' + exec + ' missing');
+    } else if (fs.statSync(exec).isFile()) {
+      console.log('Extracting executable:', exec);
+
+      util.extract({ file: exec, dir: execPath }, storeExecCallback);
+    } else if (fs.statSync(exec).isDirectory()) {
+      if (path.resolve(exec) !== path.resolve(execPath) && app.copyExecutable) {
+        console.log('Copying executable:', exec);
+
+        fs.mkdirsSync(execPath);
+        fs.copySync(exec, execPath);
+
+        console.log('Executable stored:', execPath);
+      } else if (path.resolve(output) === path.resolve(defaultOutput)) {
+        output = exec;
+
+        specPath = path.join(output, specFile);
+      } else {
+        execPath = exec;
+      }
+
+      scan();
+    }
+  });
+
+app.command('gen <api-spec>')
+  .description('generate API implementation based on given API spec (dir or file)')
+  .action(function(specPath) {
+    var output = path.resolve(app.output);
+
+    if (fs.existsSync(output)) {
+      throw new Error('output directory must not exist');
+    }
+
+    var invokers = reg.Invokers();
+    var generators = reg.Generators();
+
+    var spec;
+
+    //TODO: respect app.generator if set
+
+    var updateSpecCallback = function(callback) {
+      return function(err, apiSpec) {
+        if (err) return callback(err);
+
+        if (apiSpec) {
+          if (!apiSpec.apispec_path) {
+            apiSpec.apispec_path = spec.apispec_path;
+          }
+
+          spec = apiSpec;
+        }
+
+        callback();
+      };
+    };
+
+    async.series([
+      function(callback) {
+        util.readInput({ apispec_path: specPath }, updateSpecCallback(callback));
+      },
+      function(callback) {
+        invokers.getInvokerPath(spec, callback);
+      },
+      function(callback) {
+        spec.implementation_path = output;
+
+        if (app.implType) spec.implementation_type = app.implType;
+
+        if (app.interface) spec.interface_type = app.interface;
+
+        generators.generate(spec, updateSpecCallback(callback));
+      },
+      function(callback) {
+        //TODO: run this only if prepareExecutable has to run
+        invokers.prepareBuildtime(spec, updateSpecCallback(callback));
+      },
+      function(callback) {
+        //TODO: respect app.prepareExecutable (BOOLEAN) -> if FALSE: exec needs to be prepared at runtime
+        invokers.prepareExecutable(spec, updateSpecCallback(callback));
+      }
+    ], function(err) {
+      if (err) throw err;
+
+      console.log('API implementation generated with API spec:', spec.apispec_path);
+    });
+  });
+
+app.command('test <api-impl>')
+  .description('test given API implementation (dir)')
+  .action(function(impl) {
+    console.error('not implemented yet');
+
+    //TODO: run npm test
+  });
+
+/*
+app.command('*')
+  .description('...')
+  .action(function(cmd) {
+    console.error('Command \'' + cmd + '\' not supported.');
+
+    app.help();
+  });
+*/
+
+app.parse(process.argv);
+
+
+
+//TODO: print help if no command is given: app.help();
