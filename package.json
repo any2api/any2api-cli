@@ -1,11 +1,11 @@
 {
   "name": "any2api-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Johannes Wettinger <mail@jojow.de>",
-  "description": "Registries for any2api (scanners, invokers, generators)",
+  "description": "Command-line interface for any2api",
   "repository": {
     "type": "git",
-    "url": "https://github.com/any2api/any2api-reg"
+    "url": "https://github.com/any2api/any2api-cli"
   },
   "contributors": [
     {
@@ -16,7 +16,7 @@
   "license": "MIT",
   "keywords": [
     "any2api",
-    "registry"
+    "cli"
   ],
   "preferGlobal": true,
   "dependencies": {
