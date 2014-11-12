@@ -46,5 +46,7 @@ Or directly run the Docker container (background process):
 
 ### any2api-cli inside Docker container
 
+Instead of running any2api-cli locally, you can completely run it in a Docker container:
+
     docker build -t any2api github.com/any2api/any2api-cli
     docker run -ti any2api
