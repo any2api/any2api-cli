@@ -203,7 +203,12 @@ app.command('gen <api-spec>')
     ], function(err) {
       if (err) throw err;
 
-      console.log('API implementation generated with API spec:', spec.apispec_path);
+      specPath = spec.apispec_path;
+      delete spec.apispec_path;
+
+      fs.writeFileSync(specPath, JSON.stringify(spec, null, 2));
+
+      console.log('API implementation generated with API spec:', specPath);
     });
   });
 
