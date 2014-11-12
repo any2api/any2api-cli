@@ -30,19 +30,21 @@ Or build a Docker container to run the API implementation:
     docker build -t mysql-api-impl .
     docker run -ti mysql-api-impl bash
 
-Test API implementation:
+Test API implementation (locally or in container):
 
     npm test
 
-Start API implementation locally:
+Start API implementation (locally or in container):
 
     npm start
 
-Or directly run the Docker container built before:
+Or directly run the Docker container (background process):
 
     docker run -dP mysql-api-impl
 
-## Optional: any2api inside Docker container
+
+
+### any2api-cli inside Docker container
 
     docker build -t any2api github.com/any2api/any2api-cli
     docker run -ti any2api
