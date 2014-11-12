@@ -4,6 +4,36 @@
 
 Command-line interface for any2api
 
+## Available modules
+
+### Scanners
+
+* [Chef cookbook scanner](https://github.com/any2api/any2api-scanner-chef)
+* [Juju charm scanner](https://github.com/any2api/any2api-scanner-juju)
+* Docker scanner (planned)
+* ...
+
+### Invokers
+
+* [Chef cookbook invoker](https://github.com/any2api/any2api-invoker-chef)
+* Juju charm invoker (to be available soon)
+* Docker invoker (planned)
+* Node.js invoker (planned)
+* Ruby invoker (planned)
+* Python invoker (planned)
+* ...
+
+### Generators
+
+* [REST API generator](https://github.com/any2api/any2api-generator-rest)
+* JSON-RPC API generator (to be available soon)
+* WSDL/SOAP API generator (planned)
+* ...
+
+## Getting started
+
+Install:
+
     npm install any2api-cli -g
 
 Show help:
