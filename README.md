@@ -4,31 +4,7 @@
 
 Command-line interface for any2api
 
-## Available modules
 
-### Scanners
-
-* [Chef cookbook scanner](https://github.com/any2api/any2api-scanner-chef)
-* [Juju charm scanner](https://github.com/any2api/any2api-scanner-juju)
-* Docker scanner (planned)
-* ...
-
-### Invokers
-
-* [Chef cookbook invoker](https://github.com/any2api/any2api-invoker-chef)
-* Juju charm invoker (to be available soon)
-* Docker invoker (planned)
-* Node.js invoker (planned)
-* Ruby invoker (planned)
-* Python invoker (planned)
-* ...
-
-### Generators
-
-* [REST API generator](https://github.com/any2api/any2api-generator-rest)
-* JSON-RPC API generator (to be available soon)
-* WSDL/SOAP API generator (planned)
-* ...
 
 ## Getting started
 
@@ -74,9 +50,39 @@ Or directly run the Docker container (background process):
 
 
 
-### any2api-cli inside Docker container
+## Run any2api-cli inside Docker container
 
 Instead of running any2api-cli locally, you can completely run it in a Docker container:
 
     docker build -t any2api github.com/any2api/any2api-cli
     docker run -ti any2api
+
+
+
+## Available modules
+
+You don't have to install the individual modules manually. When installing any2api-cli, all available modules are shipped automatically.
+
+### Scanners
+
+* [Chef cookbook scanner](https://github.com/any2api/any2api-scanner-chef)
+* [Juju charm scanner](https://github.com/any2api/any2api-scanner-juju)
+* Docker scanner (planned)
+* ...
+
+### Invokers
+
+* [Chef cookbook invoker](https://github.com/any2api/any2api-invoker-chef)
+* Juju charm invoker (to be available soon)
+* Docker invoker (planned)
+* Node.js invoker (planned)
+* Ruby invoker (planned)
+* Python invoker (planned)
+* ...
+
+### Generators
+
+* [REST API generator](https://github.com/any2api/any2api-generator-rest)
+* JSON-RPC API generator (to be available soon)
+* WSDL/SOAP API generator (planned)
+* ...
