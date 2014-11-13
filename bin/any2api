@@ -79,9 +79,9 @@ app.command('scan <executable>')
 
       console.log('Writing API spec:', specPath);
 
-      apiSpec.executable_path = path.relative(output, execPath);
-      if (_.str.startsWith(apiSpec.executable_path, '..')) apiSpec.executable_path = execPath;
-      else if (_.isEmpty(apiSpec.executable_path)) apiSpec.executable_path = '.';
+      apiSpec.executable.path = path.relative(output, execPath);
+      if (_.str.startsWith(apiSpec.executable.path, '..')) apiSpec.executable.path = execPath;
+      else if (_.isEmpty(apiSpec.executable.path)) apiSpec.executable.path = '.';
 
       fs.writeFileSync(specPath, JSON.stringify(apiSpec, null, 2));
 
@@ -184,11 +184,11 @@ app.command('gen <api-spec>')
         invokers.getInvokerPath(spec, callback);
       },
       function(callback) {
-        spec.implementation_path = output;
+        spec.implementation.path = output;
 
-        if (app.implType) spec.implementation_type = app.implType;
+        if (app.implType) spec.implementation.type = app.implType;
 
-        if (app.interface) spec.interface_type = app.interface;
+        if (app.interface) spec.implementation.interface = app.interface;
 
         generators.generate(spec, updateSpecCallback(callback));
       },
