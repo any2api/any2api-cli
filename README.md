@@ -13,7 +13,7 @@ Prerequisites:
 * Node.js >= 0.10
 * Ruby (for Chef cookbook scanner)
 
-Install:
+Install any2api-cli using npm:
 
     npm install any2api-cli -g
 
