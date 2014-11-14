@@ -8,6 +8,11 @@ Command-line interface for any2api
 
 ## Getting started
 
+Prerequisites:
+
+* Node.js >= 0.10
+* Ruby (for Chef cookbook scanner)
+
 Install:
 
     npm install any2api-cli -g
