@@ -2,7 +2,6 @@
 'use strict';
 
 var app = require('commander');
-var npm = require('npm');
 var fs = require('fs-extra');
 var path = require('path');
 var url = require('url');
@@ -16,6 +15,26 @@ var reg = require('any2api-reg');
 var specFile = 'apispec.json';
 var defaultOutput = '.';
 var scannerPrefix = 'any2api-scanner-';
+
+var defaultModules = {
+  scanner: [ 'any2api-scanner-chef', 'any2api-scanner-juju' ],
+  invoker: [ 'any2api-invoker-chef' ],
+  generator: [ 'any2api-generator-rest' ]
+};
+
+
+
+var basePath = process.env.ANY2API_PATH;
+
+if (!basePath) {
+  basePath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+
+  if (!basePath) {
+    return console.error('ANY2API_PATH environment variable missing');
+  } else {
+    basePath = path.join(basePath, '.any2api');
+  }
+}
 
 
 
@@ -31,12 +50,53 @@ app.version(require('../package.json').version)
   .option('-i, --interface <name>', 'select type of interface (default: \'rest\')', 'rest')
   .option('-t, --impl-type <name>', 'select type of API implementation (default: \'node\')', 'node');
 
+app.command('install <type> <modules...>')
+  .description('install given modules (name, dir, or URL)')
+  .action(function(type, modules) {
+    if (_.contains(modules, 'all')) {
+      modules = _.filter(modules, function(module) {
+        if (module === 'all') return false;
+        else return true;
+      });
+
+      modules = modules.concat(defaultModules[type]);
+    }
+
+    modules = _.uniq(modules);
+
+    var install;
+
+    if (type === 'scanner') {
+      install = reg.Scanners({ path: basePath }).install;
+    } else if (type === 'invoker') {
+      install = reg.Invokers({ path: basePath }).install;
+    } else if (type === 'generator') {
+      install = reg.Generators({ path: basePath }).install;
+    } else {
+      return console.error('unknown module type:', type);
+    }
+
+    async.eachSeries(modules, install, function(err) {
+      if (err) throw err;
+    });
+  });
+
+app.command('uninstall <type> <modules...>')
+  .description('uninstall given modules (name)')
+  .action(function(type, modules) {
+    modules = _.uniq(modules);
+
+    console.error('not implemented yet');
+
+    //TODO: reg.uninstall() ...
+  });
+
 app.command('scan <executable>')
-  .description('scan given executable (dir, file, or URL) and create API spec')
+  .description('scan given executable (file, dir, or URL) and create API spec')
   .action(function(exec) {
     var output = path.resolve(app.output);
 
-    var scanners = reg.Scanners();
+    var scanners = reg.Scanners({ path: basePath });
 
     //TODO: maybe move some of the logic from here to any2api-reg/Scanners
     if (app.scanner && !scanners.existsSync(app.scanner)) {
@@ -75,7 +135,7 @@ app.command('scan <executable>')
       console.log('Executable scanned.');
 
       if (err) throw err;
-      else if (_.isEmpty(apiSpec)) throw new Error('api spec is empty');
+      else if (_.isEmpty(apiSpec)) throw new Error('API spec is empty, most probably no scanner available');
 
       console.log('Writing API spec:', specPath);
 
@@ -145,7 +205,7 @@ app.command('scan <executable>')
   });
 
 app.command('gen <api-spec>')
-  .description('generate API implementation based on given API spec (dir or file)')
+  .description('generate API implementation based on given API spec (file or dir)')
   .action(function(specPath) {
     var output = path.resolve(app.output);
 
@@ -153,8 +213,8 @@ app.command('gen <api-spec>')
       throw new Error('output directory must not exist');
     }
 
-    var invokers = reg.Invokers();
-    var generators = reg.Generators();
+    var invokers = reg.Invokers({ path: basePath });
+    var generators = reg.Generators({ path: basePath });
 
     var spec;
 
