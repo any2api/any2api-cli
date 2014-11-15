@@ -17,6 +17,12 @@ Install any2api-cli using npm:
 
     npm install any2api-cli -g
 
+Install all available modules:
+
+    any2api install scanner all
+    any2api install invoker all
+    any2api install generator all
+
 Show help:
 
     any2api --help
@@ -65,8 +71,6 @@ Instead of running any2api-cli locally, you can completely run it in a Docker co
 
 
 ## Available modules
-
-You don't have to install the individual modules manually. When installing any2api-cli, all available modules are shipped automatically.
 
 ### Scanners
 
