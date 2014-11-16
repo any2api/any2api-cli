@@ -6,18 +6,26 @@ Command-line interface for any2api
 
 
 
+## About any2api
+
+Use any2api to auto-generate containerized API implementations for arbitrary executables (scripts, Chef cookbooks, Juju charms, compiled programs, etc.) to ease their integration and orchestration. It's a fully modular and extensible framework. Modules are shipped as [Node modules](https://www.npmjs.org/browse/keyword/any2api), but not all of them have to be implemented in JavaScript/Node.
+
+Currently, [any2api-cli](https://github.com/any2api/any2api-cli) provides a command-line interface; a web-based user interface is planned.
+
+
+
 ## Getting started
 
 Prerequisites:
 
 * Node.js >= 0.10
-* Ruby (for Chef cookbook scanner)
+* Ruby (for any2api-scanner-chef)
 
 Install any2api-cli using npm:
 
     npm install any2api-cli -g
 
-Install all available modules:
+Install all available modules, i.e., scanners, invokers, and generators:
 
     any2api install scanner all
     any2api install invoker all
@@ -55,18 +63,22 @@ Start API implementation (locally or in container):
 
     npm start
 
-Or directly run the Docker container (background process):
+Or directly run the Docker container:
 
     docker run -dP mysql-api-impl
+
+The container is now running as a background process.
 
 
 
 ## Run any2api-cli inside Docker container
 
-Instead of running any2api-cli locally, you can completely run it in a Docker container:
+Instead of running any2api-cli locally, you can run it in a Docker container:
 
     docker build -t any2api github.com/any2api/any2api-cli
     docker run -ti any2api
+
+With this everything runs safely in an isolated container.
 
 
 
@@ -74,24 +86,24 @@ Instead of running any2api-cli locally, you can completely run it in a Docker co
 
 ### Scanners
 
-* [Chef cookbook scanner](https://github.com/any2api/any2api-scanner-chef)
-* [Juju charm scanner](https://github.com/any2api/any2api-scanner-juju)
-* Docker scanner (planned)
+* [any2api-scanner-chef](https://github.com/any2api/any2api-scanner-chef) - *scan Chef cookbooks*
+* [any2api-scanner-juju](https://github.com/any2api/any2api-scanner-juju) - *scan Juju charms*
+* any2api-scanner-docker - *scan Docker container images and Dockerfiles (planned)*
 * ...
 
 ### Invokers
 
-* [Chef cookbook invoker](https://github.com/any2api/any2api-invoker-chef)
-* Juju charm invoker (to be available soon)
-* Docker invoker (planned)
-* Node.js invoker (planned)
-* Ruby invoker (planned)
-* Python invoker (planned)
+* [any2api-invoker-chef](https://github.com/any2api/any2api-invoker-chef) - *invoke Chef cookbooks*
+* any2api-invoker-juju - *invoke Juju charm (to be available soon)*
+* any2api-invoker-docker - *run Docker containers (planned)*
+* any2api-invoker-node - *invoke Node packages (planned)*
+* any2api-invoker-ruby - *invoke Ruby scripts (planned)*
+* any2api-invoker-python - *inviker Python scripts (planned)*
 * ...
 
 ### Generators
 
-* [REST API generator](https://github.com/any2api/any2api-generator-rest)
-* JSON-RPC API generator (to be available soon)
-* WSDL/SOAP API generator (planned)
+* [any2api-generator-rest](https://github.com/any2api/any2api-generator-rest) - *generate REST API implementations based on Node.js (default) or Java (WIP)*
+* any2api-generator-jsonrpc - *generate JSON-RPC API implementations (to be available soon)*
+* any2api-generator-soap - *generate WSDL/SOAP API implementations (planned)*
 * ...
