@@ -20,6 +20,7 @@ Prerequisites:
 
 * Node.js >= 0.10
 * Ruby (for any2api-scanner-chef)
+* Docker (optional, if you want to run generated APIs in a container)
 
 Install any2api-cli using npm:
 
