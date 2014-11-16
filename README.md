@@ -74,10 +74,14 @@ The container is now running as a background process.
 
 ## Run any2api-cli inside Docker container
 
-Instead of running any2api-cli locally, you can run it in a Docker container:
+Instead of running any2api-cli locally, you can run it in a Docker container (prebuilt):
 
-    docker build -t any2api github.com/any2api/any2api-cli
-    docker run -ti any2api
+    docker run -ti any2api/any2api-cli
+
+Alternatively, you may build a fresh container and run it:
+
+    docker build -t any2api/any2api-cli github.com/any2api/any2api-cli
+    docker run -ti any2api/any2api-cli
 
 With this everything runs safely in an isolated container.
 
