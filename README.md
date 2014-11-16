@@ -8,9 +8,9 @@ Command-line interface for any2api
 
 ## About
 
-Use **any2api** to auto-generate containerized API implementations for arbitrary executables (scripts, Chef cookbooks, Juju charms, compiled programs, etc.) to ease their integration and orchestration. It's a fully modular and extensible framework. Modules are shipped as [Node modules](https://www.npmjs.org/browse/keyword/any2api), but not all of them have to be implemented in JavaScript/Node.
+Use **any2api** to wrap arbitrary executables (scripts, Chef cookbooks, Juju charms, compiled programs, etc.) by auto-generating containerized API implementations. This is to ease integration and orchestration of different kinds of executables, e.g., to implement fully automated deployment processes.
 
-Currently, [any2api-cli](https://github.com/any2api/any2api-cli) provides a command-line interface; a web-based user interface is planned.
+It's a fully modular and extensible framework. Modules are shipped as [Node modules](https://www.npmjs.org/browse/keyword/any2api), but not all of them have to be implemented in JavaScript/Node. Currently, [any2api-cli](https://github.com/any2api/any2api-cli) provides a command-line interface; a web-based user interface is planned.
 
 
 
