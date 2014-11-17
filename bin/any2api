@@ -22,8 +22,6 @@ var defaultModules = {
   generator: [ 'any2api-generator-rest' ]
 };
 
-
-
 var basePath = process.env.ANY2API_PATH;
 
 if (!basePath) {
@@ -35,6 +33,26 @@ if (!basePath) {
     basePath = path.join(basePath, '.any2api');
   }
 }
+
+
+
+var manageModules = function(args, callback) {
+  var func;
+
+  args.modules = _.uniq(args.modules);
+
+  if (args.type === 'scanner') {
+    func = reg.Scanners({ path: basePath })[args.action];
+  } else if (args.type === 'invoker') {
+    func = reg.Invokers({ path: basePath })[args.action];
+  } else if (args.type === 'generator') {
+    func = reg.Generators({ path: basePath })[args.action];
+  } else {
+    return callback(new Error('unknown module type: ' + args.type));
+  }
+
+  async.eachSeries(args.modules, func, callback);
+};
 
 
 
@@ -62,21 +80,17 @@ app.command('install <type> <modules...>')
       modules = modules.concat(defaultModules[type]);
     }
 
-    modules = _.uniq(modules);
+    manageModules({ type: type, action: 'install', modules: modules }, function(err) {
+      if (err) throw err;
+    });
+  });
 
-    var install;
+app.command('update <type> <modules...>')
+  .description('update given modules (name)')
+  .action(function(type, modules) {
+    if (_.contains(modules, 'all')) modules = [ null ];
 
-    if (type === 'scanner') {
-      install = reg.Scanners({ path: basePath }).install;
-    } else if (type === 'invoker') {
-      install = reg.Invokers({ path: basePath }).install;
-    } else if (type === 'generator') {
-      install = reg.Generators({ path: basePath }).install;
-    } else {
-      return console.error('unknown module type:', type);
-    }
-
-    async.eachSeries(modules, install, function(err) {
+    manageModules({ type: type, action: 'update', modules: modules }, function(err) {
       if (err) throw err;
     });
   });
@@ -84,11 +98,11 @@ app.command('install <type> <modules...>')
 app.command('uninstall <type> <modules...>')
   .description('uninstall given modules (name)')
   .action(function(type, modules) {
-    modules = _.uniq(modules);
+    if (_.contains(modules, 'all')) modules = [ null ];
 
-    console.error('not implemented yet');
-
-    //TODO: reg.uninstall() ...
+    manageModules({ type: type, action: 'uninstall', modules: modules }, function(err) {
+      if (err) throw err;
+    });
   });
 
 app.command('scan <executable>')
