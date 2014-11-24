@@ -1,6 +1,6 @@
-FROM dockerfile/nodejs
+FROM node:0.10
 
-RUN apt-get -y update && apt-get -y install nano ruby
+RUN apt-get -y update && apt-get -y install nano ruby sudo
 
 RUN npm install any2api-cli -g
 
