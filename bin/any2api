@@ -1,16 +1,14 @@
 #!/usr/bin/env node
 'use strict';
 
+var pkg = require('../package.json');
+var debug = require('debug')(pkg.name);
 var app = require('commander');
-var fs = require('fs-extra');
 var path = require('path');
-var url = require('url');
 var async = require('async');
 var _ = require('lodash');
-_.str = require('underscore.string');
 
-var util = require('any2api-util');
-var reg = require('any2api-reg');
+var core = require('any2api-core');
 
 var specFile = 'apispec.json';
 var defaultOutput = '.';
@@ -34,39 +32,46 @@ if (!basePath) {
   }
 }
 
+core.init({ path: basePath, log: console.log });
+
 
 
 var manageModules = function(args, callback) {
-  var func;
-
   args.modules = _.uniq(args.modules);
 
-  if (args.type === 'scanner') {
-    func = reg.Scanners({ path: basePath })[args.action];
-  } else if (args.type === 'invoker') {
-    func = reg.Invokers({ path: basePath })[args.action];
-  } else if (args.type === 'generator') {
-    func = reg.Generators({ path: basePath })[args.action];
-  } else {
+  if (!core[args.type + 's']) {
     return callback(new Error('unknown module type: ' + args.type));
   }
 
-  async.eachSeries(args.modules, func, callback);
+  async.eachSeries(args.modules, core[args.type + 's']()[args.action], callback);
 };
 
+var debugPrintOptions = function() {
+  debug('output', app.output);
+  debug('scanner', app.scanner);
+  debug('retrieve', app.retrieve);
+  debug('copy-executable', app.copyExecutable);
+  debug('generator', app.generator);
+  debug('skip-prepare', app.skipPrepare);
+  debug('interface', app.interface);
+  debug('impl-type', app.implType);
+  debug('impl-title', app.implTitle);
+}
 
 
-app.version(require('../package.json').version)
-  .option('-o, --output <dir>', 'set output directory (default: \'.\')', defaultOutput)
+
+app.version(pkg.version)
+  .option('-o, --output <dir>', 'set output directory (default: \'' + defaultOutput + '\')', defaultOutput)
   .option('-S, --scanner <name>', 'select scanner to analyze executable')
   .option('-r, --retrieve <name>', 'select retrieve protocol to download files (default: \'http\')')
-  .option('-s, --subdir <dir>', 'set subdir (rel. to output) of executable ' +
-            '(default: \'executable\')', 'executable')
+  //.option('-s, --subdir <dir>', 'set subdir (rel. to output) of executable ' +
+  //          '(default: \'executable\')', 'executable')
   .option('-c, --copy-executable', 'copy executable to output directory (disabled by default)')
   .option('-G, --generator <name>', 'select generator to create API implementation')
-  .option('-p, --prepare-executable', 'prepare executable at buildtime (disabled by default)')
-  .option('-i, --interface <name>', 'select type of interface (default: \'rest\')', 'rest')
-  .option('-t, --impl-type <name>', 'select type of API implementation (default: \'node\')', 'node');
+  .option('-s, --skip-prepare', 'skip preparing executable at buildtime')
+  .option('-i, --interface <interface>', 'select type of interface (default: \'rest\')', 'rest')
+  .option('-t, --impl-type <type>', 'select type of API implementation (default: \'node\')', 'node')
+  .option('--impl-title <title>', 'select title for API implementation');
 
 app.command('install <type> <modules...>')
   .description('install given modules (name, dir, or URL)')
@@ -105,185 +110,39 @@ app.command('uninstall <type> <modules...>')
     });
   });
 
-app.command('scan <executable>')
-  .description('scan given executable (file, dir, or URL) and create API spec')
-  .action(function(exec) {
-    var output = path.resolve(app.output);
+app.command('scan <executables...>')
+  .description('scan executables (file, dir, or URL) and create API spec')
+  .action(function(executables) {
+    debugPrintOptions();
 
-    var scanners = reg.Scanners({ path: basePath });
-
-    //TODO: maybe move some of the logic from here to any2api-reg/Scanners
-    if (app.scanner && !scanners.existsSync(app.scanner)) {
-      app.scanner = scannerPrefix + app.scanner;
-
-      if (!scanners.existsSync(app.scanner)) {
-        throw new Error('scanner ' + app.scanner + ' missing');
-      }
-    }
-
-    var execPath = output;
-
-    if (app.subdir) execPath = path.join(output, app.subdir);
-
-    fs.mkdirsSync(path.join(execPath, '..'));
-
-    var specPath = path.join(output, specFile);
-
-    var scan = function() {
-      console.log('Scanning executable:', execPath);
-
-      var basename = path.basename(exec, path.extname(exec));
-
-      if (app.scanner) {
-        scanners.get(app.scanner, function(err, Scanner) {
-          if (err) throw err;
-
-          Scanner().scan(execPath, writeSpec);
-        });
-      } else {
-        scanners.scan(execPath, writeSpec);
-      }
-    }
-
-    var writeSpec = function(err, apiSpec) {
-      console.log('Executable scanned.');
-
+    var scanCallback = function(err, apiSpec) {
       if (err) throw err;
-      else if (_.isEmpty(apiSpec)) throw new Error('API spec is empty, most probably no scanner available');
-
-      console.log('Writing API spec:', specPath);
-
-      apiSpec.executable.path = path.relative(output, execPath);
-      if (_.str.startsWith(apiSpec.executable.path, '..')) apiSpec.executable.path = execPath;
-      else if (_.isEmpty(apiSpec.executable.path)) apiSpec.executable.path = '.';
-
-      fs.writeFileSync(specPath, JSON.stringify(apiSpec, null, 2));
-
-      console.log('API spec written.');
-    }
-
-    var storeExecCallback = function(err) {
-      if (err) throw err;
-
-      console.log('Executable stored:', execPath);
-
-      scan();
     };
 
-    if (!app.retriever &&
-        (_.str.startsWith(exec, 'http://') || _.str.startsWith(exec, 'https://'))) {
-      app.retriever = 'http';
-    } else if (!app.retriever && _.str.startsWith(exec, 'lp:')) {
-      app.retriever = 'bzr';
-    }
-
-    if (app.retriever) {
-      console.log('Retrieving executable:', exec);
-
-      var execUrl = exec;
-      exec = _.last(url.parse(execUrl).pathname.replace(/\/$/, '').split('/'));
-
-      if (app.retriever === 'http' || app.retriever === 'https') {
-        util.download({ url: execUrl, dir: execPath }, storeExecCallback);
-      } else if (app.retriever === 'git') {
-        util.checkoutGit({ url: execUrl, dir: execPath }, storeExecCallback);
-      } else if (app.retriever === 'bzr' || app.retriever === 'bazaar') {
-        util.checkoutBzr({ url: execUrl, dir: execPath }, storeExecCallback);
-      } else {
-        throw new Error('retriever ' + app.retriever + ' missing');
-      }
-    } else if (!fs.existsSync(exec)) {
-      throw new Error('executable ' + exec + ' missing');
-    } else if (fs.statSync(exec).isFile()) {
-      console.log('Extracting executable:', exec);
-
-      util.extract({ file: exec, dir: execPath }, storeExecCallback);
-    } else if (fs.statSync(exec).isDirectory()) {
-      if (path.resolve(exec) !== path.resolve(execPath) && app.copyExecutable) {
-        console.log('Copying executable:', exec);
-
-        fs.mkdirsSync(execPath);
-        fs.copySync(exec, execPath);
-
-        console.log('Executable stored:', execPath);
-      } else if (path.resolve(output) === path.resolve(defaultOutput)) {
-        output = exec;
-
-        specPath = path.join(output, specFile);
-      } else {
-        execPath = exec;
-      }
-
-      scan();
-    }
+    core.scan({ executables: executables,
+                outputPath: app.output,
+                scanner: app.scanner,
+                retrieve: app.retrieve,
+                copyExecutable: app.copyExecutable }, scanCallback);
   });
 
 app.command('gen <api-spec>')
-  .description('generate API implementation based on given API spec (file or dir)')
+  .description('generate API implementation based on API spec (file or dir)')
   .action(function(specPath) {
-    var output = path.resolve(app.output);
+    debugPrintOptions();
 
-    if (fs.existsSync(output)) {
-      throw new Error('output directory must not exist');
-    }
-
-    var invokers = reg.Invokers({ path: basePath });
-    var generators = reg.Generators({ path: basePath });
-
-    var spec;
-
-    //TODO: respect app.generator if set
-
-    var updateSpecCallback = function(callback) {
-      return function(err, apiSpec) {
-        if (err) return callback(err);
-
-        if (apiSpec) {
-          if (!apiSpec.apispec_path) {
-            apiSpec.apispec_path = spec.apispec_path;
-          }
-
-          spec = apiSpec;
-        }
-
-        callback();
-      };
+    var genCallback = function(err, apiSpec) {
+      //console.trace();
+      if (err) throw err;
     };
 
-    async.series([
-      function(callback) {
-        util.readInput({ apispec_path: specPath }, updateSpecCallback(callback));
-      },
-      function(callback) {
-        invokers.getInvokerPath(spec, callback);
-      },
-      function(callback) {
-        spec.implementation.path = output;
-
-        if (app.implType) spec.implementation.type = app.implType;
-
-        if (app.interface) spec.implementation.interface = app.interface;
-
-        generators.generate(spec, updateSpecCallback(callback));
-      },
-      function(callback) {
-        //TODO: run this only if prepareExecutable has to run
-        invokers.prepareBuildtime(spec, updateSpecCallback(callback));
-      },
-      function(callback) {
-        //TODO: respect app.prepareExecutable (BOOLEAN) -> if FALSE: exec needs to be prepared at runtime
-        invokers.prepareExecutable(spec, updateSpecCallback(callback));
-      }
-    ], function(err) {
-      if (err) throw err;
-
-      specPath = spec.apispec_path;
-      delete spec.apispec_path;
-
-      fs.writeFileSync(specPath, JSON.stringify(spec, null, 2));
-
-      console.log('API implementation generated with API spec:', specPath);
-    });
+    core.gen({ specPath: specPath,
+               outputPath: app.output,
+               generator: app.generator,
+               skipPrepare: app.skipPrepare,
+               interface: app.interface,
+               implType: app.implType,
+               implTitle: app.implTitle }, genCallback);
   });
 
 app.command('test <api-impl>')

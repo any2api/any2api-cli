@@ -1,6 +1,6 @@
 {
   "name": "any2api-cli",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "author": "Johannes Wettinger <mail@jojow.de>",
   "description": "Command-line interface for any2api",
   "repository": {
@@ -23,11 +23,8 @@
     "lodash": "~2.4.1",
     "debug": "~2.1.0",
     "async": "~0.9.0",
-    "underscore.string": "~2.3.3",
     "commander": "~2.5.0",
-    "fs-extra": "~0.12.0",
-    "any2api-util": "*",
-    "any2api-reg": "*"
+    "any2api-core": "*"
   },
   "bin": {
     "any2api": "./bin/any2api"
