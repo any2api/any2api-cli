@@ -71,7 +71,7 @@ app.version(pkg.version)
   .option('-s, --skip-prepare', 'skip preparing executable at buildtime')
   .option('-i, --interface <interface>', 'select type of interface (default: \'rest\')', 'rest')
   .option('-t, --impl-type <type>', 'select type of API implementation (default: \'node\')', 'node')
-  .option('--impl-title <title>', 'select title for API implementation');
+  .option('--impl-title <title>', 'set title for API implementation');
 
 app.command('install <type> <modules...>')
   .description('install given modules (name, dir, or URL)')
