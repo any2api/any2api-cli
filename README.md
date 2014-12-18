@@ -10,7 +10,7 @@ Command-line interface for any2api
 
 Use **any2api** to wrap arbitrary executables (scripts, Chef cookbooks, Juju charms, compiled programs, etc.) by auto-generating containerized API implementations. This is to ease integration and orchestration of different kinds of executables, e.g., to implement fully automated deployment processes.
 
-It's a fully modular and extensible framework. Modules are shipped as [Node modules](https://www.npmjs.org/browse/keyword/any2api), but not all of them have to be implemented in JavaScript/Node. Currently, [any2api-cli](https://github.com/any2api/any2api-cli) provides a command-line interface; a web-based user interface is planned.
+It's a fully modular and extensible framework. Modules are shipped as [npm modules](https://www.npmjs.org/browse/keyword/any2api), but not all of them have to be implemented in JavaScript/Node. Currently, [any2api-cli](https://github.com/any2api/any2api-cli) provides a command-line interface; a web-based user interface is planned.
 
 
 
@@ -40,7 +40,8 @@ Show help:
 Scan Chef cookbook and generate API spec:
 
     export COOKBOOK='mysql'
-    any2api -o ./mysql-cb scan https://supermarket.getchef.com/cookbooks/$COOKBOOK/download
+    export VERSION='5.6.1'
+    any2api -o ./mysql-cb scan https://supermarket.chef.io/cookbooks/$COOKBOOK/versions/$VERSION/download
 
 Generate API implementation:
 
@@ -119,9 +120,9 @@ From now everything runs safely in a dedicated virtual machine.
 * [any2api-invoker-chef](https://github.com/any2api/any2api-invoker-chef) - *invoke Chef cookbooks*
 * any2api-invoker-juju - *invoke Juju charm (to be available soon)*
 * any2api-invoker-docker - *run Docker containers (planned)*
-* any2api-invoker-node - *invoke Node packages (planned)*
+* any2api-invoker-node - *invoke Node modules (planned)*
 * any2api-invoker-ruby - *invoke Ruby scripts (planned)*
-* any2api-invoker-python - *inviker Python scripts (planned)*
+* any2api-invoker-python - *invoke Python scripts (planned)*
 * ...
 
 ### Generators
