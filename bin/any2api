@@ -16,7 +16,7 @@ var scannerPrefix = 'any2api-scanner-';
 
 var defaultModules = {
   scanner: [ 'any2api-scanner-chef', 'any2api-scanner-juju' ],
-  invoker: [ 'any2api-invoker-chef' ],
+  invoker: [ 'any2api-invoker-chef', 'any2api-invoker-python' ],
   generator: [ 'any2api-generator-rest' ]
 };
 
