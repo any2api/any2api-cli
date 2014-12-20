@@ -120,9 +120,9 @@ From now everything runs safely in a dedicated virtual machine.
 * [any2api-invoker-chef](https://github.com/any2api/any2api-invoker-chef) - *invoke Chef cookbooks*
 * any2api-invoker-juju - *invoke Juju charm (to be available soon)*
 * any2api-invoker-docker - *run Docker containers (planned)*
+* [any2api-invoker-python](https://github.com/any2api/any2api-invoker-python) - *invoke Python scripts*
 * any2api-invoker-node - *invoke Node modules (planned)*
 * any2api-invoker-ruby - *invoke Ruby scripts (planned)*
-* any2api-invoker-python - *invoke Python scripts (planned)*
 * ...
 
 ### Generators
