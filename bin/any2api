@@ -3,6 +3,7 @@
 
 var pkg = require('../package.json');
 var debug = require('debug')(pkg.name);
+var log = require('verr-log')();
 var app = require('commander');
 var path = require('path');
 var async = require('async');
@@ -85,9 +86,7 @@ app.command('install <type> <modules...>')
       modules = modules.concat(defaultModules[type]);
     }
 
-    manageModules({ type: type, action: 'install', modules: modules }, function(err) {
-      if (err) throw err;
-    });
+    manageModules({ type: type, action: 'install', modules: modules }, log.error);
   });
 
 app.command('update <type> <modules...>')
@@ -95,9 +94,7 @@ app.command('update <type> <modules...>')
   .action(function(type, modules) {
     if (_.contains(modules, 'all')) modules = [ null ];
 
-    manageModules({ type: type, action: 'update', modules: modules }, function(err) {
-      if (err) throw err;
-    });
+    manageModules({ type: type, action: 'update', modules: modules }, log.error);
   });
 
 app.command('uninstall <type> <modules...>')
@@ -105,9 +102,7 @@ app.command('uninstall <type> <modules...>')
   .action(function(type, modules) {
     if (_.contains(modules, 'all')) modules = [ null ];
 
-    manageModules({ type: type, action: 'uninstall', modules: modules }, function(err) {
-      if (err) throw err;
-    });
+    manageModules({ type: type, action: 'uninstall', modules: modules }, log.error);
   });
 
 app.command('scan <executables...>')
@@ -116,7 +111,7 @@ app.command('scan <executables...>')
     debugPrintOptions();
 
     var scanCallback = function(err, apiSpec) {
-      if (err) throw err;
+      log.error(err);
     };
 
     core.scan({ executables: executables,
@@ -132,8 +127,7 @@ app.command('gen <api-spec>')
     debugPrintOptions();
 
     var genCallback = function(err, apiSpec) {
-      //console.trace();
-      if (err) throw err;
+      log.error(err);
     };
 
     core.gen({ specPath: specPath,
