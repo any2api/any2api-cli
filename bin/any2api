@@ -16,9 +16,18 @@ var defaultOutput = '.';
 var scannerPrefix = 'any2api-scanner-';
 
 var defaultModules = {
-  scanner: [ 'any2api-scanner-chef', 'any2api-scanner-juju' ],
-  invoker: [ 'any2api-invoker-chef', 'any2api-invoker-python' ],
-  generator: [ 'any2api-generator-rest' ]
+  scanner: [
+    'any2api-scanner-chef',
+    'any2api-scanner-juju'
+  ],
+  invoker: [
+    'any2api-invoker-chef',
+    'any2api-invoker-python',
+    'any2api-invoker-shell'
+  ],
+  generator: [
+    'any2api-generator-rest'
+  ]
 };
 
 var basePath = process.env.ANY2API_PATH;
