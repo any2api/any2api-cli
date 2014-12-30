@@ -23,6 +23,7 @@ var defaultModules = {
   invoker: [
     'any2api-invoker-chef',
     'any2api-invoker-python',
+    'any2api-invoker-ruby',
     'any2api-invoker-shell'
   ],
   generator: [
