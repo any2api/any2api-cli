@@ -61,7 +61,7 @@ var debugPrintOptions = function() {
   debug('output', app.output);
   debug('scanner', app.scanner);
   debug('retrieve', app.retrieve);
-  debug('copy-executable', app.copyExecutable);
+  debug('copy', app.copy);
   debug('generator', app.generator);
   debug('skip-prepare', app.skipPrepare);
   debug('interface', app.interface);
@@ -73,13 +73,13 @@ var debugPrintOptions = function() {
 
 app.version(pkg.version)
   .option('-o, --output <dir>', 'set output directory (default: \'' + defaultOutput + '\')', defaultOutput)
-  .option('-S, --scanner <name>', 'select scanner to analyze executable')
-  .option('-r, --retrieve <name>', 'select retrieve protocol to download files (default: \'http\')')
+  .option('-S, --scanner <name>', 'select scanner to analyze executables')
+  .option('-r, --retrieve <protocol>', 'select protocol to retrieve remote executables (default: \'http\')')
   //.option('-s, --subdir <dir>', 'set subdir (rel. to output) of executable ' +
   //          '(default: \'executable\')', 'executable')
-  .option('-c, --copy-executable', 'copy executable to output directory (disabled by default)')
+  .option('-c, --copy', 'copy executables to output directory (disabled by default)')
   .option('-G, --generator <name>', 'select generator to create API implementation')
-  .option('-s, --skip-prepare', 'skip preparing executable at buildtime')
+  .option('-s, --skip-prepare', 'skip preparing executables at buildtime')
   .option('-i, --interface <interface>', 'select type of interface (default: \'rest\')', 'rest')
   .option('-t, --impl-type <type>', 'select type of API implementation (default: \'node\')', 'node')
   .option('--impl-title <title>', 'set title for API implementation');
@@ -128,7 +128,7 @@ app.command('scan <executables...>')
                 outputPath: app.output,
                 scanner: app.scanner,
                 retrieve: app.retrieve,
-                copyExecutable: app.copyExecutable }, scanCallback);
+                copy: app.copy }, scanCallback);
   });
 
 app.command('gen <api-spec>')
