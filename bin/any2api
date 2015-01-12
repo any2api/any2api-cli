@@ -80,7 +80,7 @@ app.version(pkg.version)
   .option('-c, --copy', 'copy executables to output directory (disabled by default)')
   .option('-G, --generator <name>', 'select generator to create API implementation')
   .option('-s, --skip-prepare', 'skip preparing executables at buildtime')
-  .option('-i, --interface <interface>', 'select type of interface (default: \'rest\')', 'rest')
+  .option('-i, --interface <interface>', 'select kind of interface (default: \'rest\')', 'rest')
   .option('-t, --impl-type <type>', 'select type of API implementation (default: \'node\')', 'node')
   .option('--impl-title <title>', 'set title for API implementation');
 
@@ -131,7 +131,7 @@ app.command('scan <executables...>')
                 copy: app.copy }, scanCallback);
   });
 
-app.command('gen <api-spec>')
+app.command('gen <apispec>')
   .description('generate API implementation based on API spec (file or dir)')
   .action(function(specPath) {
     debugPrintOptions();
@@ -149,7 +149,7 @@ app.command('gen <api-spec>')
                implTitle: app.implTitle }, genCallback);
   });
 
-app.command('test <api-impl>')
+app.command('test <impl>')
   .description('test given API implementation (dir)')
   .action(function(impl) {
     console.error('not implemented yet');
