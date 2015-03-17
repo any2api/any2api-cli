@@ -27,7 +27,8 @@ var defaultModules = {
     'any2api-invoker-shell'
   ],
   generator: [
-    'any2api-generator-rest'
+    'any2api-generator-rest',
+    'any2api-generator-soap'
   ]
 };
 
