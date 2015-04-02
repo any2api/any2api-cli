@@ -164,12 +164,13 @@ app.command('*')
   .action(function(cmd) {
     console.error('Command \'' + cmd + '\' not supported.');
 
-    app.help();
+    app.outputHelp();
   });
 */
 
 app.parse(process.argv);
 
-
-
-//TODO: print help if no command is given: app.help();
+// print help by default
+if (!process.argv.slice(2).length) {
+  app.outputHelp();
+}
