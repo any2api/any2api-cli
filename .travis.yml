@@ -3,6 +3,6 @@ node_js:
 - '4'
 deploy:
   api_key:
-    secure: Plg4y5iD1cGHs+O01h65HFXJulgC5bnMWpHIkTVx+/61waeHFzDfZy8zMHTwI03l78XPkb9nbCGLe2pQsqkH+xa/SYk20xdaIhZw2As5UlIbt5hOFSapVRy9RozvgSGfq65hFzjTWJ021rlV6FL9yUzE3fXubzRaY1opQx4EVYY=
+    secure: PGGvd57ADbMuWldPl3MJg75fV6r0ZV7NEXzcriyPMInGBsWxu62R8wzIQVYeX3f28WwUhwipNCbxs/cEZOegudz1mcW2gRDxATBaNZ/5C4QGdEONI7n3omKkygpFX+iLkzy2Z5mEFuk+qSDj1WzX49I3dVumLjhpdD5uzA7Qp70=
   email: mail@jojow.de
   provider: npm

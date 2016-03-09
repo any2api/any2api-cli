@@ -1,6 +1,6 @@
 {
   "name": "any2api-cli",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "author": "Johannes Wettinger <mail@jojow.de>",
   "description": "Command-line interface for any2api",
   "repository": {
@@ -29,8 +29,5 @@
   },
   "bin": {
     "any2api": "./bin/any2api"
-  },
-  "engines": {
-    "node": ">= 0.10"
   }
 }
