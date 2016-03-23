@@ -1,11 +1,12 @@
 FROM node:4
 
-RUN apt-get -y update && apt-get -y install nano ruby sudo
+RUN apt-get -y update && \
+    apt-get -y install nano ruby sudo && \
+    apt-get clean
 
-RUN npm install any2api-cli -g
+RUN npm install any2api-cli -g && \
+    any2api install scanner all && \
+    any2api install invoker all && \
+    any2api install generator all
 
-RUN any2api install scanner all
-RUN any2api install invoker all
-RUN any2api install generator all
-
-CMD bash
+ENTRYPOINT [ "any2api" ]
