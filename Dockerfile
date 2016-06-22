@@ -10,3 +10,4 @@ RUN npm install any2api-cli -g && \
     any2api install generator all
 
 ENTRYPOINT [ "any2api" ]
+CMD [ "--help" ]
